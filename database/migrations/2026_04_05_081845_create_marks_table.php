@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('enrollments', function (Blueprint $table) {
+        Schema::create('marks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')
               ->constrained()
@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('course_id')
               ->constrained()
               ->onDelete('cascade');
+            $table->decimal('marks', 5, 2);       
+            $table->string('grade');              
             $table->unique(['student_id', 'course_id']);
             $table->timestamps();
         });
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('enrollments');
+        Schema::dropIfExists('marks');
     }
 };
