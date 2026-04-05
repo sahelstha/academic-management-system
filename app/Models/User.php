@@ -2,48 +2,77 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Columns that can be mass-assigned (filled via forms)
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Columns to hide (never expose these in JSON responses)
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
+    }
+
+    // ═══════════════════════════════
+    //         RELATIONSHIPS
+    // ═══════════════════════════════
+
+    // A user belongs to one role
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    // A user (student) has one student profile
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    // A user (teacher) has many courses
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'teacher_id');
+    }
+
+    // ═══════════════════════════════
+    //         HELPER METHODS
+    // ═══════════════════════════════
+
+    // Check if user is admin
+    public function isAdmin(): bool
+    {
+        return $this->role->name === 'admin';
+    }
+
+    // Check if user is teacher
+    public function isTeacher(): bool
+    {
+        return $this->role->name === 'teacher';
+    }
+
+    // Check if user is student
+    public function isStudent(): bool
+    {
+        return $this->role->name === 'student';
     }
 }
